@@ -11,7 +11,7 @@ class ImageRepository @Inject constructor(private val imageApi: ImageApi){
     suspend fun getImages(query: String, type: String, page: Int): List<Item>? {
         val result = imageApi.getImages("Moon", "image", 1)
         if (result.isSuccessful && result.body() != null){
-            return imageApi.getImages("Moon", "image", 1).body()?.collection?.items
+            return imageApi.getImages(query, "image", page).body()?.collection?.items
         }
         return ArrayList()
     }

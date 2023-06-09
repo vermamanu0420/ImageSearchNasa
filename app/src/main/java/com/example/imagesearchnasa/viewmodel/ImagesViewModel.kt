@@ -16,15 +16,10 @@ class ImagesViewModel @Inject constructor(private val repository: ImageRepositor
     private val _searchResults = MutableStateFlow<List<Item>>(emptyList())
     val searchResults: StateFlow<List<Item>> get() = _searchResults
 
-    init {
-        viewModelScope.launch {
-            getImages()
-        }
 
-    }
-    private suspend fun getImages() {
+    fun getImages(query: String) {
         viewModelScope.launch {
-            _searchResults.value = repository.getImages("moon", "image", 1)!!
+            _searchResults.value = repository.getImages(query, "image", 1)!!
         }
     }
 }
