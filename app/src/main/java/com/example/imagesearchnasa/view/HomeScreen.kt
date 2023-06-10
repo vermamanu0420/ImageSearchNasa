@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
@@ -71,8 +72,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                 // this works from the device keyboard enter
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        imagesViewModel.getImages(searchQuery);
-                        focusManager.clearFocus()
+                        performSearch(searchQuery, focusManager, imagesViewModel)
                     }
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -81,9 +81,8 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                 ),
                 modifier = Modifier.onKeyEvent {
                     // this only to handle the enter press form the keyboard while testing in emulator
-                    if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER){
-                        imagesViewModel.getImages(searchQuery);
-                        focusManager.clearFocus()
+                    if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+                        performSearch(searchQuery, focusManager, imagesViewModel)
                         true
                     }
                     false
@@ -91,8 +90,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
             )
             Spacer(modifier = Modifier.width(2.dp))
             Button(onClick = {
-                imagesViewModel.getImages(searchQuery);
-                focusManager.clearFocus()
+                performSearch(searchQuery, focusManager, imagesViewModel)
             }) {
                 Text(text = "Search")
             }
@@ -166,4 +164,14 @@ fun CardWithImageAndTitle(title: String, url: String, date: String) {
             }
         }
     }
+}
+
+private fun performSearch(
+    searchQuery: String,
+    focusManager: FocusManager,
+    imagesViewModel: ImagesViewModel
+) {
+    // physical keyboard adds linebreak on enter key so need to trim the query string
+    imagesViewModel.getImages(searchQuery.trim());
+    focusManager.clearFocus()
 }
