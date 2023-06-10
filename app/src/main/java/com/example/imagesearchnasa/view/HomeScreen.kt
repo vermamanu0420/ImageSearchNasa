@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -23,11 +25,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -35,12 +40,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.imagesearchnasa.viewmodel.ImagesViewModel
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.imagesearchnasa.R
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
@@ -50,11 +59,12 @@ fun HomeScreen(navHostController: NavHostController, imagesViewModel: ImagesView
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
-
+    val listState = rememberLazyListState()
     var searchQuery by remember { mutableStateOf("") }
     val searchResults by imagesViewModel.searchResults.collectAsState()
     val focusManager = LocalFocusManager.current
     val isLoading by imagesViewModel.isLoading.collectAsState()
+    val isLoadingMore by imagesViewModel.isLoadingMore.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +100,8 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
             )
             Spacer(modifier = Modifier.width(2.dp))
             Button(onClick = {
-                performSearch(searchQuery, focusManager, imagesViewModel)
+
+               performSearch(searchQuery, focusManager, imagesViewModel)
             }) {
                 Text(text = "Search")
             }
@@ -101,7 +112,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            LazyColumn() {
+            LazyColumn(state = listState) {
                 items(searchResults) { result ->
                     CardWithImageAndTitle(
                         result.data.get(0).title,
@@ -122,7 +133,43 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                 }
             }
         }
+        // this shows the loading animation at the bottom on scroll
+        if (isLoadingMore){
+            LoadingAnimation()
+        }
 
+    }
+    // call the extension function
+    listState.OnBottomReached {
+        if (searchQuery.trim().isEmpty())
+            return@OnBottomReached;
+        // do on load more
+        GlobalScope.launch {
+            imagesViewModel.fetchMoreImages(searchQuery.trim())
+        }
+    }
+}
+
+@Composable
+fun LazyListState.OnBottomReached(
+    loadMore: () -> Unit
+) {
+    val shouldLoadMore = remember {
+        derivedStateOf {
+            val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
+                ?: return@derivedStateOf true
+
+            lastVisibleItem.index == layoutInfo.totalItemsCount - 1
+        }
+    }
+
+    // Convert the state into a cold flow and collect
+    LaunchedEffect(shouldLoadMore) {
+        snapshotFlow { shouldLoadMore.value }
+            .collect {
+                // if should load more, then invoke loadMore
+                if (it) loadMore()
+            }
     }
 }
 
@@ -140,9 +187,11 @@ fun CardWithImageAndTitle(title: String, url: String, date: String) {
             AsyncImage(
                 modifier = Modifier
                     .height(100.dp)
-                    .width(100.dp),
+                    .width(100.dp)
+                ,
                 contentScale = ContentScale.FillBounds,
                 model = url,
+                placeholder = painterResource(id = R.drawable.placeholder_image_24),
                 contentDescription = null // Provide an appropriate content description
             )
 
@@ -171,6 +220,8 @@ private fun performSearch(
     focusManager: FocusManager,
     imagesViewModel: ImagesViewModel
 ) {
+    if (searchQuery.trim().isEmpty())
+        return
     // physical keyboard adds linebreak on enter key so need to trim the query string
     imagesViewModel.getImages(searchQuery.trim());
     focusManager.clearFocus()
