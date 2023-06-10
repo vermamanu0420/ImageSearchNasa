@@ -14,6 +14,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ImagesViewModel @Inject constructor(private val repository: ImageRepository): ViewModel() {
+
+    private val _selectedResults = MutableStateFlow<Item?>(null)
+    val selectedResults: MutableStateFlow<Item?> get() = _selectedResults
+
     private val _searchResults = MutableStateFlow<List<Item>>(emptyList())
     val searchResults: StateFlow<List<Item>> get() = _searchResults
     private val _isLoading = MutableStateFlow(false)

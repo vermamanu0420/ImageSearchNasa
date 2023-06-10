@@ -23,15 +23,11 @@ class MainActivity : ComponentActivity() {
         val imageViewModel by viewModels<ImagesViewModel>()
         setContent {
             ImageSearchNasaTheme {
-                val navController = rememberNavController()
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
+
+
                     val navController = rememberNavController()
                     SetupNavigationGraph(navHostController = navController, imageViewModel)
-                }
+
             }
         }
     }

@@ -1,6 +1,8 @@
 package com.example.imagesearchnasa.view
 
+import android.widget.AdapterView.OnItemClickListener
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +50,7 @@ import com.example.imagesearchnasa.viewmodel.ImagesViewModel
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.imagesearchnasa.R
+import com.example.imagesearchnasa.navigation.Screen
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -118,7 +121,10 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                         result.data.get(0).title,
                         result.links.get(0).href,
                         result.data.get(0).date_created
-                    )
+                    ) {
+                        imagesViewModel.selectedResults.value = result
+                        navHostController.navigate(Screen.Detail.route)
+                    }
                 }
             }
             if (isLoading) {
@@ -174,12 +180,16 @@ fun LazyListState.OnBottomReached(
 }
 
 @Composable
-fun CardWithImageAndTitle(title: String, url: String, date: String) {
+fun CardWithImageAndTitle(title: String, url: String, date: String, onItemClickListener: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable {
+                onItemClickListener.invoke()
+            },
         shape = RoundedCornerShape(8.dp)
+
     ) {
         Row(
             modifier = Modifier.padding(16.dp)
