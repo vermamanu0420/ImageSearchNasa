@@ -1,6 +1,8 @@
 package com.example.imagesearchnasa.view
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -35,9 +38,10 @@ import com.example.imagesearchnasa.viewmodel.ImagesViewModel
 
 
 @Composable
-fun HomeScreen(navHostController: NavHostController,imagesViewModel: ImagesViewModel) {
-    Home(navHostController,imagesViewModel)
+fun HomeScreen(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
+    Home(navHostController, imagesViewModel)
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
@@ -45,6 +49,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
     var searchQuery by remember { mutableStateOf("") }
     val searchResults by imagesViewModel.searchResults.collectAsState()
     val focusManager = LocalFocusManager.current
+    val isLoading by imagesViewModel.isLoading.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -60,16 +65,38 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                 label = { Text(text = "Search") }
             )
             Spacer(modifier = Modifier.width(2.dp))
-            Button(onClick = { imagesViewModel.getImages(searchQuery); focusManager.clearFocus() }) {
+            Button(onClick = {
+                imagesViewModel.getImages(searchQuery); focusManager.clearFocus()
+            }) {
                 Text(text = "Search")
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn (modifier = Modifier.weight(1f)){
-            items(searchResults) { result ->
-                CardWithImageAndTitle(result.data.get(0).title,result.links.get(0).href, result.data.get(0).date_created)
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f)) {
+            LazyColumn() {
+                items(searchResults) { result ->
+                    CardWithImageAndTitle(
+                        result.data.get(0).title,
+                        result.links.get(0).href,
+                        result.data.get(0).date_created
+                    )
+                }
+            }
+            if (isLoading) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.White),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LoadingAnimation()
+                }
             }
         }
+
     }
 }
 
@@ -85,7 +112,9 @@ fun CardWithImageAndTitle(title: String, url: String, date: String) {
             modifier = Modifier.padding(16.dp)
         ) {
             AsyncImage(
-                modifier = Modifier.height(100.dp).width(100.dp),
+                modifier = Modifier
+                    .height(100.dp)
+                    .width(100.dp),
                 contentScale = ContentScale.FillBounds,
                 model = url,
                 contentDescription = null // Provide an appropriate content description
