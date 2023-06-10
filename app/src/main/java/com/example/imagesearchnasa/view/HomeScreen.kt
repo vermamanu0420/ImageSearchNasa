@@ -43,12 +43,15 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.imagesearchnasa.viewmodel.ImagesViewModel
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import com.example.imagesearchnasa.R
 import com.example.imagesearchnasa.navigation.Screen
 import kotlinx.coroutines.GlobalScope
@@ -63,7 +66,9 @@ fun HomeScreen(navHostController: NavHostController, imagesViewModel: ImagesView
 @Composable
 fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
     val listState = rememberLazyListState()
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by remember {
+       imagesViewModel.query
+    }
     val searchResults by imagesViewModel.searchResults.collectAsState()
     val focusManager = LocalFocusManager.current
     val isLoading by imagesViewModel.isLoading.collectAsState()
@@ -75,17 +80,18 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = searchQuery,
                 maxLines = 1,
                 singleLine = true,
-                onValueChange = { query -> searchQuery = query },
+                onValueChange = { query -> imagesViewModel.query.value = query },
                 label = { Text(text = "Search") },
                 // this works from the device keyboard enter
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        performSearch(searchQuery, focusManager, imagesViewModel)
+                        performSearch(focusManager, imagesViewModel)
                     }
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -95,7 +101,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                 modifier = Modifier.onKeyEvent {
                     // this only to handle the enter press form the keyboard while testing in emulator
                     if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
-                        performSearch(searchQuery, focusManager, imagesViewModel)
+                        performSearch(focusManager, imagesViewModel)
                         true
                     }
                     false
@@ -104,7 +110,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
             Spacer(modifier = Modifier.width(2.dp))
             Button(onClick = {
 
-               performSearch(searchQuery, focusManager, imagesViewModel)
+               performSearch(focusManager, imagesViewModel)
             }) {
                 Text(text = "Search")
             }
@@ -138,12 +144,15 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                     LoadingAnimation()
                 }
             }
+
+            if (searchResults.isEmpty() && !isLoading){
+                NoDataAvailable()
+            }
         }
         // this shows the loading animation at the bottom on scroll
         if (isLoadingMore){
             LoadingAnimation()
         }
-
     }
     // call the extension function
     listState.OnBottomReached {
@@ -151,7 +160,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
             return@OnBottomReached;
         // do on load more
         GlobalScope.launch {
-            imagesViewModel.fetchMoreImages(searchQuery.trim())
+            imagesViewModel.fetchMoreImages()
         }
     }
 }
@@ -225,14 +234,33 @@ fun CardWithImageAndTitle(title: String, url: String, date: String, onItemClickL
     }
 }
 
+@Composable
+fun NoDataAvailable() {
+    Column(
+        modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            text = "No Data Available",
+            style = TextStyle(fontSize = 16.sp),
+            textAlign = TextAlign.Center,
+
+            )
+    }
+
+}
+
 private fun performSearch(
-    searchQuery: String,
     focusManager: FocusManager,
     imagesViewModel: ImagesViewModel
 ) {
-    if (searchQuery.trim().isEmpty())
-        return
     // physical keyboard adds linebreak on enter key so need to trim the query string
-    imagesViewModel.getImages(searchQuery.trim());
+    imagesViewModel.getImages();
     focusManager.clearFocus()
 }

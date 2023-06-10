@@ -9,9 +9,9 @@ import javax.inject.Singleton
 class ImageRepository @Inject constructor(private val imageApi: ImageApi){
 
     suspend fun getImages(query: String, type: String, page: Int): List<Item>? {
-        val result = imageApi.getImages("Moon", "image", 1)
+        val result = imageApi.getImages(query.trim(), "image", page)
         if (result.isSuccessful && result.body() != null){
-            return imageApi.getImages(query, "image", page).body()?.collection?.items
+            return result.body()?.collection?.items
         }
         return ArrayList()
     }

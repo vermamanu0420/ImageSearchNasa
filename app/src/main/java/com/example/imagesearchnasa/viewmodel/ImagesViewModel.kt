@@ -1,5 +1,7 @@
 package com.example.imagesearchnasa.viewmodel
 
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.imagesearchnasa.model.Item
@@ -15,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ImagesViewModel @Inject constructor(private val repository: ImageRepository): ViewModel() {
 
+    val query = mutableStateOf("")
     private val _selectedResults = MutableStateFlow<Item?>(null)
     val selectedResults: MutableStateFlow<Item?> get() = _selectedResults
 
@@ -28,25 +31,28 @@ class ImagesViewModel @Inject constructor(private val repository: ImageRepositor
 
     private var currentPage = 1
 
-    fun getImages(query: String, page:Int = 1) {
+    fun getImages() {
         currentPage = 1
+        if (query.value.trim().isEmpty()){
+            _searchResults.value = emptyList()
+            return
+        }
         viewModelScope.launch {
             _isLoading.value = true
-            _searchResults.value = repository.getImages(query, "image", page)!!
+            _searchResults.value = repository.getImages(query.value, "image", currentPage)!!
             _isLoading.value = false
         }
     }
 
-    fun fetchMoreImages(query: String) {
-        if (query.isEmpty())
+    fun fetchMoreImages() {
+        if (query.value.trim().isEmpty())
             return
-
         currentPage++
 
         viewModelScope.launch {
             _isLoadingMore.value = true
             _searchResults.update { items ->
-                items + repository.getImages(query, "image", currentPage)!!
+                items + repository.getImages(query.value, "image", currentPage)!!
             }
             _isLoadingMore.value = false
         }
