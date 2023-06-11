@@ -1,21 +1,12 @@
 package com.example.imagesearchnasa.view
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -74,8 +65,7 @@ fun ImageDetailScreen(navController: NavHostController, imagesViewModel: ImagesV
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(500.dp)
+                    .height(400.dp)
                     .background(Color.White)
                     .graphicsLayer {
                         translationY = 0.5f * scrollState.value
@@ -90,16 +80,42 @@ fun ImageDetailScreen(navController: NavHostController, imagesViewModel: ImagesV
                     contentDescription = null // Provide an appropriate content description
                 )
             }
-            selectedItem?.data?.get(0)?.let {
-                Text(
-                    text =  it.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.background(
-                        Color.White
-                    ).fillMaxWidth().padding(16.dp),
 
-                    )
+            Column(
+                modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp,0.dp,16.dp,16.dp)
+            ) {
+                Text(
+                    text = "Date: ${selectedItem?.data?.get(0)?.date_created}",
+                    textAlign = TextAlign.End,
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth().background(Color.White).padding(0.dp).align(Alignment.End)
+                )
+
+                Text(
+                    text = "Description",
+                    textAlign = TextAlign.End,
+                    fontStyle = FontStyle.Italic,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+
+                selectedItem?.data?.get(0)?.let {
+                    Text(
+                        text =  it.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                            .background(
+                                Color.White
+                            )
+                            .fillMaxWidth()
+                            .padding(16.dp),
+
+                        )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
+
         }
     }
 }

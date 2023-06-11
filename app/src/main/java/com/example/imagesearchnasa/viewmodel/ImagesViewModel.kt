@@ -1,6 +1,5 @@
 package com.example.imagesearchnasa.viewmodel
 
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ImagesViewModel @Inject constructor(private val repository: ImageRepository): ViewModel() {
+class ImagesViewModel @Inject constructor(private val repository: ImageRepository) : ViewModel() {
 
     val query = mutableStateOf("")
     private val _selectedResults = MutableStateFlow<Item?>(null)
@@ -33,7 +32,7 @@ class ImagesViewModel @Inject constructor(private val repository: ImageRepositor
 
     fun getImages() {
         currentPage = 1
-        if (query.value.trim().isEmpty()){
+        if (query.value.trim().isEmpty()) {
             _searchResults.value = emptyList()
             return
         }
