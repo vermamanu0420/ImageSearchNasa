@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.imagesearchnasa.model.Item
 import com.example.imagesearchnasa.repository.ImageRepository
+import com.example.imagesearchnasa.repository.NetworkConnectionInterceptor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ImagesViewModel @Inject constructor(private val repository: ImageRepository) : ViewModel() {
+class ImagesViewModel @Inject constructor(private val repository: ImageRepository, private val networkConnectionInterceptor: NetworkConnectionInterceptor) : ViewModel() {
 
     val query = mutableStateOf("")
     private val _selectedResults = MutableStateFlow<Item?>(null)
@@ -38,7 +39,13 @@ class ImagesViewModel @Inject constructor(private val repository: ImageRepositor
         }
         viewModelScope.launch {
             _isLoading.value = true
-            _searchResults.value = repository.getImages(query.value, "image", currentPage)!!
+            if (networkConnectionInterceptor.isConnected) {
+                try {
+                    _searchResults.value = repository.getImages(query.value, "image", currentPage)!!
+                } catch (e: Exception) {
+                    TODO("Not yet implemented")
+                }
+            }
             _isLoading.value = false
         }
     }
