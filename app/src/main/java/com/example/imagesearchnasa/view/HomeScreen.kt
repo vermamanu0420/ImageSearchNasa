@@ -68,12 +68,13 @@ fun HomeScreen(navHostController: NavHostController, imagesViewModel: ImagesView
 fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
     val listState = rememberLazyListState()
     var searchQuery by remember {
-       imagesViewModel.query
+        imagesViewModel.query
     }
     val searchResults by imagesViewModel.searchResults.collectAsState()
     val focusManager = LocalFocusManager.current
     val isLoading by imagesViewModel.isLoading.collectAsState()
     val isLoadingMore by imagesViewModel.isLoadingMore.collectAsState()
+    val isNetworkConnected by imagesViewModel.isNetworkConnected.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -111,7 +112,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
             Spacer(modifier = Modifier.width(2.dp))
             Button(onClick = {
 
-               performSearch(focusManager, imagesViewModel)
+                performSearch(focusManager, imagesViewModel)
             }) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -150,13 +151,14 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                     LoadingAnimation()
                 }
             }
-
-            if (searchResults.isEmpty() && !isLoading){
-                NoDataAvailable()
+            if (!isNetworkConnected){
+                ShowTextMessage(message = "No Internet")
+            } else if(searchResults.isEmpty() && !isLoading) {
+                ShowTextMessage(message = "No Data Available")
             }
         }
         // this shows the loading animation at the bottom on scroll
-        if (isLoadingMore){
+        if (isLoadingMore) {
             LoadingAnimation()
         }
     }
@@ -195,7 +197,12 @@ fun LazyListState.OnBottomReached(
 }
 
 @Composable
-fun CardWithImageAndTitle(title: String, url: String, date: String, onItemClickListener: () -> Unit) {
+fun CardWithImageAndTitle(
+    title: String,
+    url: String,
+    date: String,
+    onItemClickListener: () -> Unit
+) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -212,8 +219,7 @@ fun CardWithImageAndTitle(title: String, url: String, date: String, onItemClickL
             AsyncImage(
                 modifier = Modifier
                     .height(100.dp)
-                    .width(100.dp)
-                ,
+                    .width(100.dp),
                 contentScale = ContentScale.FillBounds,
                 model = url,
                 placeholder = painterResource(id = R.drawable.placeholder_image_24),
@@ -241,11 +247,11 @@ fun CardWithImageAndTitle(title: String, url: String, date: String, onItemClickL
 }
 
 @Composable
-fun NoDataAvailable() {
+fun ShowTextMessage(message: String) {
     Column(
         modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp),
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -253,7 +259,7 @@ fun NoDataAvailable() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            text = "No Data Available",
+            text = message,
             style = TextStyle(fontSize = 16.sp),
             textAlign = TextAlign.Center,
 

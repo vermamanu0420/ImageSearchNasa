@@ -17,11 +17,8 @@ class MainActivity : ComponentActivity() {
         val imageViewModel by viewModels<ImagesViewModel>()
         setContent {
             ImageSearchNasaTheme {
-
-
-                    val navController = rememberNavController()
-                    SetupNavigationGraph(navHostController = navController, imageViewModel)
-
+                val navController = rememberNavController()
+                SetupNavigationGraph(navHostController = navController, imageViewModel)
             }
         }
     }

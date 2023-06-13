@@ -12,15 +12,15 @@ import com.example.imagesearchnasa.viewmodel.ImagesViewModel
 @Composable
 fun SetupNavigationGraph(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
     NavHost(navController = navHostController, startDestination = Screen.Splash.route) {
-        composable(route = Screen.Splash.route){
+        composable(route = Screen.Splash.route) {
             SplashScreen(navHostController)
         }
 
-        composable(route = Screen.Home.route){
+        composable(route = Screen.Home.route) {
             HomeScreen(navHostController, imagesViewModel)
         }
 
-        composable(route = Screen.Detail.route){
+        composable(route = Screen.Detail.route) {
             ImageDetailScreen(navHostController, imagesViewModel)
         }
     }

@@ -15,19 +15,27 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ImagesViewModel @Inject constructor(private val repository: ImageRepository, private val networkConnectionInterceptor: NetworkConnectionInterceptor) : ViewModel() {
+class ImagesViewModel @Inject constructor(
+    private val repository: ImageRepository,
+    private val networkConnectionInterceptor: NetworkConnectionInterceptor
+) : ViewModel() {
 
     val query = mutableStateOf("")
+
     private val _selectedResults = MutableStateFlow<Item?>(null)
     val selectedResults: MutableStateFlow<Item?> get() = _selectedResults
 
     private val _searchResults = MutableStateFlow<List<Item>>(emptyList())
     val searchResults: StateFlow<List<Item>> get() = _searchResults
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore = _isLoadingMore.asStateFlow()
+
+    private val _isNetworkConnected = MutableStateFlow(true)
+    val isNetworkConnected = _isNetworkConnected.asStateFlow()
 
     private var currentPage = 1
 
@@ -40,11 +48,15 @@ class ImagesViewModel @Inject constructor(private val repository: ImageRepositor
         viewModelScope.launch {
             _isLoading.value = true
             if (networkConnectionInterceptor.isConnected) {
+                _isNetworkConnected.value = true
                 try {
                     _searchResults.value = repository.getImages(query.value, "image", currentPage)!!
                 } catch (e: Exception) {
                     TODO("Not yet implemented")
                 }
+            } else {
+                _isNetworkConnected.value = false
+                _searchResults.value = emptyList()
             }
             _isLoading.value = false
         }

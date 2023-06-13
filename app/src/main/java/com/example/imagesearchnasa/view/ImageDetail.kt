@@ -32,7 +32,6 @@ import com.example.imagesearchnasa.R
 import com.example.imagesearchnasa.navigation.Screen
 import com.example.imagesearchnasa.viewmodel.ImagesViewModel
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageDetailScreen(navController: NavHostController, imagesViewModel: ImagesViewModel) {
@@ -43,7 +42,14 @@ fun ImageDetailScreen(navController: NavHostController, imagesViewModel: ImagesV
             TopAppBar(
                 colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
                 title = {
-                    selectedItem?.data?.get(0)?.let { Text(text = it.title, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    selectedItem?.data?.get(0)?.let {
+                        Text(
+                            text = it.title,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigate(Screen.Home.route) }) {
@@ -53,8 +59,6 @@ fun ImageDetailScreen(navController: NavHostController, imagesViewModel: ImagesV
             )
         }
     ) { paddingValue ->
-
-
         val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
@@ -82,14 +86,21 @@ fun ImageDetailScreen(navController: NavHostController, imagesViewModel: ImagesV
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth().background(Color.White).padding(16.dp,0.dp,16.dp,16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(16.dp, 0.dp, 16.dp, 16.dp)
             ) {
                 Text(
                     text = "Date: ${selectedItem?.data?.get(0)?.date_created}",
                     textAlign = TextAlign.End,
                     fontStyle = FontStyle.Italic,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.fillMaxWidth().background(Color.White).padding(0.dp).align(Alignment.End)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White)
+                        .padding(0.dp)
+                        .align(Alignment.End)
                 )
 
                 Text(
@@ -101,7 +112,7 @@ fun ImageDetailScreen(navController: NavHostController, imagesViewModel: ImagesV
 
                 selectedItem?.data?.get(0)?.let {
                     Text(
-                        text =  it.description,
+                        text = it.description,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .background(

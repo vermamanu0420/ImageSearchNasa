@@ -12,7 +12,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-
 import org.mockito.junit.MockitoJUnitRunner
 import retrofit2.Response
 
@@ -29,13 +28,14 @@ class ImageRepositoryTest {
     }
 
     @Test
-    fun test_Success_APi_Response()= runBlocking{
-        val mockData = ImageDetailModel(Collection("link", emptyList(), emptyList(),Metadata(1),"1.0"))
+    fun test_Success_API_Response() = runBlocking {
+        val mockData =
+            ImageDetailModel(Collection("link", emptyList(), emptyList(), Metadata(1), "1.0"))
         val mockResponse = Response.success(mockData)
-        `when`(imageApi.getImages("moon","image",1)).thenReturn(mockResponse)
+        `when`(imageApi.getImages("moon", "image", 1)).thenReturn(mockResponse)
 
 
-        assertEquals(mockData.collection.items, imageRepository.getImages("moon","image",1))
+        assertEquals(mockData.collection.items, imageRepository.getImages("moon", "image", 1))
 
     }
 }
