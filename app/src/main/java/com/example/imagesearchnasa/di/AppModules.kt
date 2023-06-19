@@ -29,7 +29,7 @@ class AppModules {
     }
 
     @Provides
-    fun provideImageApi(networkConnectionInterceptor: NetworkConnectionInterceptor): Retrofit {
+    fun provideRetrofit(networkConnectionInterceptor: NetworkConnectionInterceptor): Retrofit {
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor(networkConnectionInterceptor)
             .build()
@@ -43,7 +43,7 @@ class AppModules {
     }
 
     @Provides
-    fun provideMyWorkRepository(networkConnectionInterceptor: NetworkConnectionInterceptor): ImageApi {
-        return provideImageApi(networkConnectionInterceptor).create(ImageApi::class.java)
+    fun provideImageApi(networkConnectionInterceptor: NetworkConnectionInterceptor): ImageApi {
+        return provideRetrofit(networkConnectionInterceptor).create(ImageApi::class.java)
     }
 }

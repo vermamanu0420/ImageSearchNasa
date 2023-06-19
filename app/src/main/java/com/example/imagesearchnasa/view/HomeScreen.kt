@@ -63,6 +63,7 @@ fun HomeScreen(navHostController: NavHostController, imagesViewModel: ImagesView
     Home(navHostController, imagesViewModel)
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel) {
@@ -101,7 +102,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                     keyboardType = KeyboardType.Text
                 ),
                 modifier = Modifier.onKeyEvent {
-                    // this only to handle the enter press form the keyboard while testing in emulator
+                    // this only to handle the enter press form the physical keyboard while testing in emulator
                     if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
                         performSearch(focusManager, imagesViewModel)
                         true
