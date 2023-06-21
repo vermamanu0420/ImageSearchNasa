@@ -129,6 +129,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                 .fillMaxWidth()
                 .weight(1f)
         ) {
+            //  this is the list element to show search results
             LazyColumn(state = listState) {
                 items(searchResults) { result ->
                     CardWithImageAndTitle(
@@ -141,6 +142,7 @@ fun Home(navHostController: NavHostController, imagesViewModel: ImagesViewModel)
                     }
                 }
             }
+            // loading animation while api call
             if (isLoading) {
                 Column(
                     modifier = Modifier
